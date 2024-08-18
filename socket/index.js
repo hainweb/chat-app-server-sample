@@ -38,7 +38,7 @@ io.on('connection', async (socket) => {
  
 
     //create a room
-    socket.join(user?._id?.toString())
+    socket.join(user?._id.toString())
     onlineUser.add(user?._id?.toString())
 
     io.emit('onlineUser',Array.from(onlineUser))
