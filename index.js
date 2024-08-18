@@ -7,19 +7,28 @@ const router = require('./routes/index')
 const cookiesParser = require('cookie-parser')
 const { app, server } = require('./socket/index')
 
+const server = http.createServer(app);
+
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 
-// Also update Socket.IO CORS settings
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
+  transports: ['websocket', 'polling']
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected', socket.id);
+  socket.on('disconnect', (reason) => {
+    console.log('Client disconnected', socket.id, reason);
+  });
 });
 app.use(express.json())
 app.use(cookiesParser())
