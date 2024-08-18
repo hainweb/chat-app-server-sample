@@ -157,12 +157,8 @@ io.on('connection', async (socket) => {
     })
 
     //disconnect
-    socket.on('disconnect', () => {
-        console.log('Disconnected from server');
-        setTimeout(() => {
-          console.log('Attempting to reconnect...');
-          socket.connect();
-        }, 5000);
+    socket.on('disconnect', (reason) => {
+        console.log('Client disconnected', socket.id, reason);
       });
 })
 
