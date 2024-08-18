@@ -10,12 +10,13 @@ const app = express()
 
 /***socket connection */
 const server = http.createServer(app)
-const io = new Server(server,{
-    cors : {
-        origin : process.env.FRONTEND_URL,
-        credentials : true
-    }
-})
+const io = new Server(server, {
+    cors: {
+      origin: process.env.FRONTEND_URL,
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
 
 /***
  * socket running at http://localhost:8080/
@@ -23,14 +24,18 @@ const io = new Server(server,{
 
 //online user
 const onlineUser = new Set()
-
-io.on('connection',async(socket)=>{
-    console.log("connect User ", socket.id)
-
-    const token = socket.handshake.auth.token 
-
-    //current user details 
-    const user = await getUserDetailsFromToken(token)
+io.on('connection', async (socket) => {
+    console.log("Attempting to connect user", socket.id);
+    try {
+      const token = socket.handshake.auth.token;
+      console.log("Received token:", token);
+      const user = await getUserDetailsFromToken(token);
+      console.log("User details:", user);
+      // ... rest of the code
+    } catch (error) {
+      console.error("Error in socket connection:", error);
+    }
+ 
 
     //create a room
     socket.join(user?._id?.toString())
@@ -152,10 +157,13 @@ io.on('connection',async(socket)=>{
     })
 
     //disconnect
-    socket.on('disconnect',()=>{
-        onlineUser.delete(user?._id?.toString())
-        console.log('disconnect user ',socket.id)
-    })
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+        setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          socket.connect();
+        }, 5000);
+      });
 })
 
 module.exports = {
